@@ -11,6 +11,9 @@
 * 支援.shp、.csv、.kml等資料來源
 * 僅需提供檔案名稱、圖層顏色之色碼即可出圖
 
+## 使用範例：
+![image](https://github.com/cvb14795/export-static-map/blob/master/Example.jpg)
+點擊右方連結以觀看詳細的範例：https://github.com/cvb14795/export-static-map/blob/master/ExportPic.ipynb
 
 ## 所需第三方模組：
 
