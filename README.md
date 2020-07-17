@@ -11,6 +11,10 @@
 * 支援.shp、.csv、.kml .asc 等資料來源 (*)
 * 僅需提供檔案名稱、圖層顏色之色碼即可出圖
 
+## 使用範例：
+![image] (https://github.com/cvb14795/export-static-map/blob/master/Example.jpg)  
+詳細請見：https://github.com/cvb14795/export-static-map/blob/master/ExportPic.ipynb
+
 ## 所需第三方模組：
 
 * cartopy == 0.17.0
@@ -24,3 +28,4 @@
 
 * 地圖API目前僅支援OpenStreetMap (OSM)。
 * .asc檔案格式支援尚在實驗階段。
+
