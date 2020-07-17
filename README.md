@@ -3,7 +3,7 @@
 
 ------
 
-`export-static-map`為基於python3的gis出圖程式。
+`export-static-map`為基於Python3的gis出圖程式。
 
 ## 功能：
 
@@ -15,10 +15,10 @@
 ## 所需第三方模組：
 
 * cartopy == 0.17.0
-* numpy >=1.18.4
+* numpy >= 1.18.4
 * geopandas >= 0.7.0
 * fiona >= 1.8.13
-* matplotlib >=3.2.1	
+* matplotlib >= 3.2.1	
 * rasterio >= 1.1.5
 
 ## Note:
