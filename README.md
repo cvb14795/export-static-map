@@ -1,9 +1,9 @@
-# gis_export_image
-`gis_export_image` is a Python program for plotting static base map and export to image file to display.
+# export-static-map
+`export-static-map` is a Python program for plotting static base map and export to image file to display.
 
 ------
 
-`gis_export_image`為基於python3的gis出圖程式。
+`export-static-map`為基於python3的gis出圖程式。
 
 ## 功能：
 
