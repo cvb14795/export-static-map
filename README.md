@@ -13,6 +13,10 @@
 ## 使用範例：
 ![image](https://github.com/cvb14795/export-static-map/blob/master/img/Example.jpg)
 點擊右方連結以觀看更詳細的範例：https://github.com/cvb14795/export-static-map/blob/master/ExportPic.ipynb
+  ### 資料來源:  
+  > 台灣_鄉鎮市區界線： https://data.gov.tw/dataset/7441  
+  > 氣象測站：https://e-service.cwb.gov.tw/wdps/obs/state.htm <br>
+  
 
 ## 所需第三方模組：
 
