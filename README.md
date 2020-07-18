@@ -1,9 +1,8 @@
 # gis_export_image
+`gis_export_image`為基於Python 3的GIS（地理資訊系統）出圖程式。  
 `gis_export_image` is a Python program for plotting static base map and export to image file to display.
 
 ------
-
-`gis_export_image`為基於python3的gis出圖程式。
 
 ## 功能：
 
@@ -12,8 +11,8 @@
 * 僅需提供檔案名稱、圖層顏色之色碼即可出圖
 
 ## 使用範例：
-![image](https://github.com/cvb14795/export-static-map/blob/master/Example.jpg)
-點擊右方連結以觀看詳細的範例：https://github.com/cvb14795/export-static-map/blob/master/ExportPic.ipynb
+![image](https://github.com/cvb14795/export-static-map/blob/master/img/Example.jpg)
+點擊右方連結以觀看更詳細的範例：https://github.com/cvb14795/export-static-map/blob/master/ExportPic.ipynb
 
 ## 所需第三方模組：
 
