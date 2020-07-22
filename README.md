@@ -26,6 +26,8 @@
 * fiona >= 1.8.13
 * matplotlib >=3.2.1	
 * rasterio >= 1.1.5
+* gdal >= 3.0.4
+* descartes >= 1.1.0
 
 ## Note:
 
