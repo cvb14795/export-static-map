@@ -5,7 +5,6 @@
 ------
 
 ## 功能：
-
 * 可串接OpenStreetMap之地圖API
 * 支援.shp、.csv、.kml等資料來源
 * 僅需提供檔案名稱、圖層顏色之色碼即可出圖
@@ -17,9 +16,10 @@
   > 台灣_鄉鎮市區界線： https://data.gov.tw/dataset/7441  
   > 氣象測站：https://e-service.cwb.gov.tw/wdps/obs/state.htm <br>
   
+## Python版本
+* Python 3.8
 
-## 所需第三方模組：
-
+## 所需模組：
 * cartopy == 0.17.0
 * numpy >=1.18.4
 * geopandas >= 0.7.0
@@ -30,5 +30,4 @@
 * descartes >= 1.1.0
 
 ## Note:
-
 地圖API目前僅支援OpenStreetMap (OSM)。
