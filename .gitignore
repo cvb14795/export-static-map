@@ -2,3 +2,15 @@ output/
 input/ASC/
 __pycache__/
 test/
+build/
+ExportStaticMap_GIS/
+ExportStaticMap_GIS0728/
+input/temp/dm1d0300/tmp4joq7t8w/temp_dm1d0300.tif
+測試用&備份/setup過濾matplotlib.backend.py
+input/temp/
+測試用&備份/
+setup.py
+setup_withoutlib.py
+test.bat
+Pipfile
+Pipfile.lock

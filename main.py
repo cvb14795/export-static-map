@@ -6,11 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import math
 import os, sys
-import rasterio
-import rasterio.plot
 import read
-
-# cartpy0.17bug
+# cartpy0.17F
 import six
 from PIL import Image
 
@@ -19,7 +16,7 @@ class ExportPic:
     def __init__(self):
         reading = read.ReadInput()
         reading.readConfig()
-        res, self.file_set, self.df_set, self.raster_set, self.color_set = reading.readInputFile()
+        res, self.title, self.file_set, self.df_set, self.color_set, self.max_raster_val = reading.readInputFile()
         if not res:
             sys.exit(1)
 
@@ -78,15 +75,16 @@ class ExportPic:
             # 迭代各dataframe 回傳經緯度min/max (minx/maxx/miny/maxy)
             bound = [9999, 0, 9999, 0]  # 預設值
             for df in self.df_set:
-                bounds = df.geometry.bounds
-                # 檢查各值 有更大的框則更新
-                bound = [min(bounds.minx) if min(bounds.minx) < bound[0] else bound[0],  # 最小經度
-                         max(bounds.maxx) if max(bounds.maxx) > bound[1] else bound[1],  # 最大經度
-                         min(bounds.miny) if min(bounds.miny) < bound[2] else bound[2],  # 最小緯度
-                         max(bounds.maxy) if max(bounds.maxy) > bound[3] else bound[3]]  # 最大緯度
-                # margin_lng = (bound[0] - bound[1]) * 0.03
-                # margin_lat = (bound[2] - bound[3]) * 0.03
-                # bound = list(map(lambda x, y: x + y, bound, [-margin_lng, +margin_lng, -margin_lat, +margin_lat]))
+                if len(df) != 0:
+                    bounds = df.geometry.bounds
+                    # 檢查各值 有更大的框則更新
+                    bound = [min(bounds.minx) if min(bounds.minx) < bound[0] else bound[0],  # 最小經度
+                             max(bounds.maxx) if max(bounds.maxx) > bound[1] else bound[1],  # 最大經度
+                             min(bounds.miny) if min(bounds.miny) < bound[2] else bound[2],  # 最小緯度
+                             max(bounds.maxy) if max(bounds.maxy) > bound[3] else bound[3]]  # 最大緯度
+                    # margin_lng = (bound[0] - bound[1]) * 0.03
+                    # margin_lat = (bound[2] - bound[3]) * 0.03
+                    # bound = list(map(lambda x, y: x + y, bound, [-margin_lng, +margin_lng, -margin_lat, +margin_lat]))
             return bound
 
         bound = getLngLatBounds()
@@ -102,7 +100,7 @@ class ExportPic:
         fig = plt.figure(dpi=self.dpi)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
-        ax.set_title("測試")
+        ax.set_title(self.title)
         ax.set_extent(bound, ccrs.PlateCarree())
         # 獲取fig框像素大小
         fig_size = fig.get_size_inches() * fig.dpi
@@ -126,7 +124,8 @@ class ExportPic:
         # regrid_shape: basemap長寬之短邊尺寸
         regrid = max(mapDim.values())
         # ax.add_image(imagery, zoom, interpolation=inter, regrid_shape=regrid)
-        ax.add_image(imagery, zoom_lv, regrid_shape=regrid)
+        #ax.add_image(imagery, zoom_lv, regrid_shape=regrid)
+        ax.add_image(imagery, zoom_lv)
         # 色碼表： https://www.ebaomonthly.com/window/photo/lesson/colorList.htm
         return ax
 
@@ -138,63 +137,69 @@ class ExportPic:
                         dpi=self.dpi,
                         #!
                         # 防止圖例轉圖像時被裁剪
-                        bbox_extra_artists=(self.lg,),
+                        #bbox_extra_artists=(self.lg,),
                         bbox_inches='tight'
                         )
             et = time.time() - st
-            print("成功! 存檔耗時{:.1f}秒".format(et))
+            print("成功! 存檔耗時{:.2f}秒".format(et))
 
         ax = self.getAx()
         patchs = []
-        data_set = self.df_set + self.raster_set
-        for i, (label, color, data) in enumerate(zip(self.file_set, self.color_set, data_set)):
-            # vector檔
-            if i < len(self.df_set):
-                if sum(data.geom_type == 'Point') != 0:
-                    ax.scatter([point.x for point in data.geometry],
-                               [point.y for point in data.geometry],
-                               s=[2 for j in range(len(data.geometry))],  # s = size:控制每個點大小的list
+        labels = []
+        for i, (label, color, data) in enumerate(zip(self.file_set, self.color_set, self.df_set)):
+            if sum(data.geom_type == 'Point') != 0:
+                ax.scatter([point.x for point in data.geometry],
+                           [point.y for point in data.geometry],
+                           s=[2 for index in range(len(data.geometry))],  # s = size:控制每個點大小的list
+                           c=color,
+                           alpha=0.6,
+                           transform=ccrs.PlateCarree(),
+                           zorder=2)  # Zorder:大的在上面
+            elif sum(data.geom_type == 'MultiPoint') != 0:
+                for points in data.geometry:
+                    ax.scatter([point.x for point in points],
+                               [point.y for point in points],
+                               s=[2 for index in range(len(data.geometry))],
                                c=color,
                                alpha=0.6,
                                transform=ccrs.PlateCarree(),
-                               zorder=2)  # Zorder:大的在上面
-                elif sum(data.geom_type == 'MultiPoint') != 0:
-                    for points in data.geometry:
-                        ax.scatter([point.x for point in points],
-                                   [point.y for point in points],
-                                   s=[2 for i in range(len(data.geometry))],
-                                   c=color,
-                                   alpha=0.6,
-                                   transform=ccrs.PlateCarree(),
-                                   zorder=2)
-                else:  # polygon
-                    c='blue'
-                    # add_geomrtries把資料視為polygon匯入 若是point add後會沒有東西
-                    ax.add_geometries(data.geometry,
+                               zorder=2)
+            elif os.path.splitext(label)[1] == ".asc":
+                cmap = plt.get_cmap(color)
+                color = cmap
+                for poly, val in zip(data.geometry, data.raster_val):
+                    ax.add_geometries([poly],
                                       ccrs.PlateCarree(),
-                                      edgecolor='white',
-                                      facecolor=color,
-                                      alpha=0.5,
-                                      zorder=1)
-                # plt.plot的圖例可指定實例讓handles自動生成
-                # add_geometries的圖例需由mpatches.Patch生成
-                patchs.append(mpatches.Patch(color=color,
-                                             label=label))
-            # raster檔
-            else:
-                with rasterio.open(data) as src:
-                    rasterio.plot.show(src, ax=ax)
+                                      edgecolor=None,
+                                      facecolor=cmap((val / self.max_raster_val)),
+                                      alpha=0.85,
+                                      zorder=3
+                                      )
+            else:  # 其他檔案類型的polygon
+                # add_geomrtries把資料視為polygon匯入 若是point add後會沒有東西
+                ax.add_geometries(data.geometry,
+                                  ccrs.PlateCarree(),
+                                  edgecolor='white',
+                                  facecolor=color,
+                                  alpha=0.5,
+                                  zorder=1)
+            # plt.plot的圖例可指定實例讓handles自動生成
+            # add_geometries的圖例需由mpatches.Patch生成
+            label_color = color if os.path.splitext(label)[1] != ".asc" else color(0)
+            patchs.append(mpatches.Patch(color=label_color,
+                                         label=label))
         self.lg = plt.legend(handles=patchs,
-                             bbox_to_anchor=(1.05, 1))  # (0,0):軸左下 ; (1,1):軸右上
-                             # loc='upper left',
-                             # borderaxespad=0.
+                             bbox_to_anchor=(1.05, 1),  # (0,0):軸左下 ; (1,1):軸右上
+                             loc='upper left',
+                             borderaxespad=0.)
         try:
             savePicure()
+            #先savefig再show 否則圖片空白
+            #plt.show()
         except ValueError:
             # 找不到tiles
             print("獲取背景圖tiles時發生錯誤，請檢查網路連線!")
             sys.exit(1)
-        plt.show()
 
 
 if __name__ == "__main__":
