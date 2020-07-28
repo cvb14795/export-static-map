@@ -98,10 +98,6 @@ class ReadInput:
                             df = gp.read_file(out_path, encoding='utf-8')
                         elif self.ext[i] == 'asc':
                             # 欲座標轉換的asc檔 存在"input\\ASC\\當前檔名" 資料夾下
-                            temp_root = ".\\input\\temp"
-                            temp_dir = "{}\\{}".format(temp_root, f)
-                            if not os.path.exists(temp_dir):
-                                os.makedirs(temp_dir)
                             geom = self.asc.getGeometry(f)
                             self.max_raster_val = self.asc.getRasterMaxValue()
                             df = gp.GeoDataFrame.from_features(geom)
@@ -112,7 +108,9 @@ class ReadInput:
                             df = gp.read_file(".\\input\\{}.{}".format(f, self.ext[i]), encoding='utf-8',
                                               **self.options)
 
-                        df.crs = {'init': 'epsg:4326'}  # 避免input沒給 這邊給預設值(WGS84)
+                        # {'init': 'epsg:4326'}會導致xy軸座標交換的錯誤
+                        # see: https://github.com/pyproj4/pyproj/issues/355
+                        df.crs = 'EPSG:4326'  # 避免input沒給 這邊給預設值(WGS84)
                         print("原座標系統： {}".format(df.crs))
                         # 座標轉換
                         df = df.to_crs(epsg=4326)

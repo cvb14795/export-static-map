@@ -1,4 +1,5 @@
-import os
+#import os
+from osgeo import gdal
 import rasterio
 import rasterio.features
 import rasterio.warp
@@ -7,7 +8,6 @@ from tempfile import TemporaryDirectory
 
 class ReadASC:
     def getGeometry(self, f):
-        geojson_list = []
         with TemporaryDirectory() as temp_dir:
             # 複製原檔案 將crs寫到暫存檔
             org_path = ".\\input\\{}.asc".format(f)
@@ -17,7 +17,12 @@ class ReadASC:
             # GeoTiff投影後CRS
             dst_crs = 'EPSG:4326'
             # ASCII轉GeoTiff
-            os.system("gdal_translate -of GTiff -a_srs " + src_crs + " " + org_path + " " + temp_path)
+            # os.system("gdal_translate -of GTiff -a_srs " + src_crs + " " + org_path + " " + temp_path)
+            # 開啟dataset
+            ds = gdal.Open(org_path)
+            ds = gdal.Translate(destName=temp_path, srcDS=ds, format="GTiff", outputSRS=src_crs)
+            # 關閉dataset
+            ds = None
             # 獲取投影轉換參數
             with rasterio.open(temp_path, mode='r') as src:
                 print("cellSize(x,y): ", src.res)
@@ -54,7 +59,7 @@ class ReadASC:
                     in enumerate(
                     rasterio.features.shapes(image, mask=mask, transform=src.transform)))
             geom = list(results)
-            return geom
+        return geom
 
     def getRasterMaxValue(self):
         return self.max_raster_val

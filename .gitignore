@@ -14,3 +14,4 @@ setup_withoutlib.py
 test.bat
 Pipfile
 Pipfile.lock
+*.7z
