@@ -11,6 +11,8 @@ import read
 import six
 from PIL import Image
 
+if os.path.exists(".\\lib"):
+    sys.path.append(".\\lib\\osgeo\\gdalplugins\\ogr_FileGDB.dll")
 
 class ExportPic:
     def __init__(self):
