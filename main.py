@@ -7,17 +7,27 @@ import matplotlib.patches as mpatches
 import math
 import os, sys
 import read
-# cartpy0.17F
+# cartpy0.17
 import six
 from PIL import Image
-
+# 針對打包exe後之環境變數配置
+#os.environ["GDAL_DATA"] = os.path.realpath(".\\lib\\osgeo\\data\\gdal")
+#os.environ["PROJ_LIB"] = os.path.realpath(".\\lib\\osgeo\\data\\proj")
 class ExportPic:
     def __init__(self):
-        reading = read.ReadInput()
-        reading.readConfig()
-        res, self.title, self.file_set, self.df_set, self.color_set, self.max_raster_val = reading.readInputFile()
-        if not res:
+        print("設置環境變數...")
+        print("GDAL_DATA: ", os.environ["GDAL_DATA"])
+        print("PROJ_LIB: ", os.environ["PROJ_LIB"])
+        self.reading = read.ReadInput()
+        resCfgIni, self.err_msg, self.title, self.bound = self.reading.readConfig()
+        if not resCfgIni:
+            print(self.err_msg)
             sys.exit(1)
+        resCfgFile, self.err_msg, self.file_set, self.df_set, self.color_set = self.reading.readInputFile()
+        if not resCfgFile:
+            print(self.err_msg)
+            sys.exit(1)
+
 
     def getAx(self):
         def newGetImage(self, tile):
@@ -86,7 +96,10 @@ class ExportPic:
                     # bound = list(map(lambda x, y: x + y, bound, [-margin_lng, +margin_lng, -margin_lat, +margin_lat]))
             return bound
 
-        bound = getLngLatBounds()
+        # 沒有自訂bound 使用資料之最大邊界為bound
+        if len(self.bound) == 0:
+            self.bound = getLngLatBounds()
+
         # fig與legend固定4比1
         # 字體大小12pt
         # legend超出則裁切
@@ -94,19 +107,20 @@ class ExportPic:
         # see： https://stackoverflow.com/questions/10960463/non-ascii-characters-in-matplotlib
         plt.rcParams['axes.unicode_minus'] = False  # 解決負號 '-' 顯示為方塊的問題
         plt.rc('font', **{'sans-serif': 'Microsoft JhengHei',  # 指定中文字體 (微軟正黑體)
-                          'family': 'sans-serif'})  # 指定默認字型
+                          'family': 'sans-serif',
+                          'size': 12})  # 指定默認字型
         self.dpi = 300
         fig = plt.figure(dpi=self.dpi)
         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
 
         ax.set_title(self.title)
-        ax.set_extent(bound, ccrs.PlateCarree())
+        ax.set_extent(self.bound, ccrs.PlateCarree())
         # 獲取fig框像素大小
         fig_size = fig.get_size_inches() * fig.dpi
         mapDim = {"height": int(fig_size[0]),
                   "width": int(fig_size[1])}
         # 計算zoom_level
-        zoom_lv = getBoundsZoomLevel(bound, mapDim)
+        zoom_lv = getBoundsZoomLevel(self.bound, mapDim)
         print("計算最佳zoom_level: ", zoom_lv)
 
         OSM.get_image = newGetImage
@@ -167,10 +181,13 @@ class ExportPic:
                 cmap = plt.get_cmap(color)
                 color = cmap
                 for poly, val in zip(data.geometry, data.raster_val):
+                    cmap_result = self.reading.asc.calcValRange(val)
+
                     ax.add_geometries([poly],
                                       ccrs.PlateCarree(),
                                       edgecolor=None,
-                                      facecolor=cmap((val / self.max_raster_val)),
+                                      # facecolor=cmap((val / max_raster_val)),
+                                      facecolor=cmap(cmap_result),
                                       alpha=0.85,
                                       zorder=3
                                       )
@@ -197,7 +214,8 @@ class ExportPic:
             #plt.show()
         except ValueError:
             # 找不到tiles
-            print("獲取背景圖tiles時發生錯誤，請檢查網路連線!")
+            self.err_msg += "獲取背景圖tiles時發生錯誤，請檢查網路連線!"
+            print(self.err_msg)
             sys.exit(1)
 
 
@@ -205,8 +223,3 @@ if __name__ == "__main__":
     main = ExportPic()
     main.plot()
     os.system("pause")
-
-
-
-
-

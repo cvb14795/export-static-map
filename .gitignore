@@ -15,3 +15,5 @@ test.bat
 Pipfile
 Pipfile.lock
 *.7z
+ExportStaticMap_GIS_0806backup/
+ExportStaticMap_GIS_0813backup/
